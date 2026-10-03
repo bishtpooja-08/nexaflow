@@ -20,7 +20,7 @@ class AuthController extends Controller
 
         // Find the user
         $user = User::where('email', $validated['email'])
-            ->whereNull('deleted_at')
+            // ->whereNull('deleted_at')
             ->first();
 
         // Check whether user exists

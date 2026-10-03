@@ -1,85 +1,182 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from './components/HelloWorld.vue'
+import { ref } from 'vue'
+import api from './services/api'
+
+const email = ref('')
+const password = ref('')
+const errorMessage = ref('')
+const isLoading = ref(false)
+
+const login = async () => {
+  errorMessage.value = ''
+  isLoading.value = true
+
+  try {
+    const response = await api.post('/login', {
+      email: email.value,
+      password: password.value,
+    })
+
+    console.log('Login response:', response.data)
+  } catch (error: any) {
+    errorMessage.value =
+      error.response?.data?.message ?? 'Login failed. Please try again.'
+  } finally {
+    isLoading.value = false
+  }
+}
 </script>
 
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
+  <main class="login-page">
+    <section class="login-card">
+      <header class="login-header">
+        <h1>NexaFlow</h1>
+        <p>Sales Operations Platform</p>
+      </header>
 
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
 
-      <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
-      </nav>
-    </div>
-  </header>
+        <form class="login-form" @submit.prevent="login">
+            <div class="form-group">
+            <label for="email">Email</label>
 
-  <RouterView />
+            <input
+                id="email"
+                v-model="email"
+                type="email"
+                placeholder="Enter your email"
+                autocomplete="email"
+                required
+            />
+            </div>
+
+            <div class="form-group">
+            <label for="password">Password</label>
+
+            <input
+                id="password"
+                v-model="password"
+                type="password"
+                placeholder="Enter your password"
+                autocomplete="current-password"
+                required
+            />
+            </div>
+
+            <p v-if="errorMessage" class="error-message">
+            {{ errorMessage }}
+            </p>
+
+            <button
+            class="login-button"
+            type="submit"
+            :disabled="isLoading"
+            >
+            {{ isLoading ? 'Logging in...' : 'Login' }}
+            </button>
+        </form>
+    </section>
+  </main>
 </template>
 
 <style scoped>
-header {
-  line-height: 1.5;
-  max-height: 100vh;
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  box-sizing: border-box;
+  background: #f3f4f6;
 }
 
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
-
-nav {
+.login-card {
   width: 100%;
-  font-size: 12px;
+  max-width: 420px;
+  padding: 40px;
+  box-sizing: border-box;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.login-header {
+  margin-bottom: 32px;
   text-align: center;
-  margin-top: 2rem;
 }
 
-nav a.router-link-exact-active {
-  color: var(--color-text);
+.login-header h1 {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 700;
+  color: #111827;
 }
 
-nav a.router-link-exact-active:hover {
-  background-color: transparent;
+.login-header p {
+  margin: 8px 0 0;
+  font-size: 14px;
+  color: #6b7280;
 }
 
-nav a {
-  display: inline-block;
-  padding: 0 1rem;
-  border-left: 1px solid var(--color-border);
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
-nav a:first-of-type {
-  border: 0;
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
+.form-group label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+}
 
-  .logo {
-    margin: 0 2rem 0 0;
-  }
+.form-group input {
+  width: 100%;
+  padding: 12px 14px;
+  box-sizing: border-box;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  outline: none;
+  font-size: 15px;
+  transition: border-color 0.2s;
+}
 
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
+.form-group input:focus {
+  border-color: #4f46e5;
+}
 
-  nav {
-    text-align: left;
-    margin-left: -1rem;
-    font-size: 1rem;
+.login-button {
+  width: 100%;
+  padding: 13px;
+  border: none;
+  border-radius: 8px;
+  background: #4f46e5;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
 
-    padding: 1rem 0;
-    margin-top: 1rem;
-  }
+.login-button:hover:not(:disabled) {
+  background: #4338ca;
+}
+
+.login-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.error-message {
+  margin: -4px 0 0;
+  color: #dc2626;
+  font-size: 14px;
 }
 </style>
